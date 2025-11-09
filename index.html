@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festive Photo Collage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: Arial, sans-serif;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transform-origin: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Special handling for IMG_7702.jpg */
+        .gallery-item img[src*="IMG_7702"] {
+            object-fit: contain;
+            background-color: #1a1a1a;
+        }
+
+        /* Special handling for Image.jpg */
+        .gallery-item img[src*="Image.jpg"] {
+            object-position: top center;
+        }
+
+        /* Special handling for IMG_2716.png */
+        .gallery-item img[src*="IMG_2716"] {
+            object-fit: contain;
+            background-color: #1a1a1a;
+        }
+
+        /* Special handling for image (1).png */
+        .gallery-item img[src*="image (1)"] {
+            transform: rotate(-270deg);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Special hover handling for image (1).png to maintain rotation */
+        .gallery-item:hover img[src*="image (1)"] {
+            transform: rotate(-270deg) scale(1.1);
+        }
+
+        /* Random slight rotations for some other images */
+        .gallery-item:nth-child(3n) {
+            transform: rotate(3deg);
+        }
+
+        .gallery-item:nth-child(5n) {
+            transform: rotate(-2deg);
+        }
+
+        .gallery-item:nth-child(7n) {
+            transform: rotate(4deg);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        /* Special handling for modal view of image (1).png */
+        .modal-content[src*="image (1)"] {
+            transform: rotate(-270deg);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery">
+    </div>
+
+    <div class="modal" id="imageModal">
+        <span class="close-button">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        // Function to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to load images from the directory
+        async function loadImages() {
+            let imageFiles = [
+                '20251031_175739.jpg',
+                'ChatGPT Image Oct 30, 2025, 04_48_24 PM.png',
+                'F541D2B0-440C-4B63-BF67-32B08A888313.png',
+                'FAA591F9-761A-480B-8B79-B54DE5136A6A.png',
+                'IMG-20251102-WA0010.jpg',
+                'IMG_0193.jpg',
+                'IMG_0195.JPG',
+                'IMG_0196.jpeg',
+                'IMG_2073.jpg',
+                'IMG_2074.jpg',
+                'IMG_2716.png',
+                'IMG_3722.jpeg',
+                'IMG_3743.jpeg',
+                'IMG_3753.jpg',
+                'IMG_5382.jpg',
+                'IMG_7160.jpg',
+                'IMG_7518.jpg',
+                'IMG_7702.jpg',
+                'IMG_7723.jpg',
+                'IMG_7729.jpg',
+                'IMG_7767.jpg',
+                'IMG_7774.jpg',
+                'IMG_7778.jpg',
+                'IMG_7808.jpg',
+                'Image from iOS.jpg',
+                'Image.jpg',
+                'Image1.png',
+                'Image2.png',
+                'Image3.png',
+                'Image5.jpeg',
+                'Image6.png',
+                'image (1).png',
+                'image (2).png',
+                'image (3).png',
+                'image (4).png',
+                'image.png'
+            ];
+
+            // Shuffle the array of images
+            imageFiles = shuffleArray(imageFiles);
+
+            const gallery = document.querySelector('.gallery');
+            
+            imageFiles.forEach((filename, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                
+                const img = document.createElement('img');
+                img.src = 'images/' + filename;
+                img.alt = filename;
+                
+                item.appendChild(img);
+                gallery.appendChild(item);
+            });
+        }
+
+        // Modal functionality
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const closeButton = document.querySelector('.close-button');
+
+        document.querySelector('.gallery').addEventListener('click', (e) => {
+            const clickedImage = e.target.closest('img');
+            if (clickedImage) {
+                modal.classList.add('active');
+                modalImg.src = clickedImage.src;
+            }
+        });
+
+        closeButton.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Load images when the page loads
+        window.addEventListener('load', loadImages);
+    </script>
+</body>
+</html>
